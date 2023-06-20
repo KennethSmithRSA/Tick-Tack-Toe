@@ -1,0 +1,38 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+.boardContainer {
+    display: flex;
+    width: 95px;
+    height: 95px;
+    flex-wrap: wrap;
+    margin: 30px;
+}
+
+.cell {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell[data-index="0"],
+.cell[data-index="1"],
+.cell[data-index="3"],
+.cell[data-index="4"] {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+
+.cell[data-index="2"],
+.cell[data-index="5"] {
+    border-bottom: 1px solid black;
+}
+
+.cell[data-index="6"],
+.cell[data-index="7"] {
+    border-right: 1px solid black;
+}
