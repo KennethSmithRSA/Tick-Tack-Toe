@@ -16,12 +16,31 @@ let player2 = Player('player2', 'O');
 
 let playerFlag = player2;
 
-let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-
 const gameControl = (() => {
+    const boardContainer = document.querySelector('.boardContainer');
+    let toggleNavBtn = document.getElementById('toggle-nav');
+    let nav = document.getElementById('navlist');
+    let restartGameBtn = document.getElementById('restartGameBtn');
+    let roundWin = false;
+    let count = 0;
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ]
+
     const renderGameBoard = () => {
-        const boardContainer = document.querySelector('.boardContainer');
         let length = GameBoard.gameBoardObj.gameBoardArr.length;
+
+        // for (let i = 0; i < length; i++) {
+        //     boardContainer.innerHTML += `<div class="cell" data-index="${i}">${GameBoard.gameBoardObj.gameBoardArr[i]}</>`
+        // }
+
         for (let i = 0; i < length; i++) {
             let cell = document.createElement('div');
             cell.classList.add(`cell`);
@@ -30,8 +49,6 @@ const gameControl = (() => {
             boardContainer.append(cell);
         }
     };
-
-    let count = 0;
 
     const ChangeSymbol = () => {
         let cells = document.querySelectorAll('.cell');
@@ -47,28 +64,15 @@ const gameControl = (() => {
                     }
                     cell.textContent = playerFlag.symbol;
                 }
-                arr.splice(cell.dataset.index, 1, cell.textContent);
-                cell.preventDefault();
+                GameBoard.gameBoardObj.gameBoardArr.splice(cell.dataset.index, 1, cell.textContent);
                 count++;
-                console.log(arr);
-                checkGameEndConditions(arr)
+                console.log(GameBoard.gameBoardObj.gameBoardArr);
+                checkGameEndConditions(GameBoard.gameBoardObj.gameBoardArr)
             })
         });
     };
 
-    const winningConditions = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-    ]
-
     const checkGameEndConditions = (arr) => {
-        let roundWin = false;
         for (let i = 0; i <= 7; i++) {
             const winCondition = winningConditions[i];
             let a = arr[winCondition[0]];
@@ -77,6 +81,7 @@ const gameControl = (() => {
 
             if (a === b && b === c) {
                 console.log('Win');
+                roundWin = true;
                 break;
             }
 
@@ -86,11 +91,41 @@ const gameControl = (() => {
         }
     }
 
+    const restartGame = () => {
+        GameBoard.gameBoardObj.gameBoardArr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        while (boardContainer.hasChildNodes())
+        boardContainer.removeChild(boardContainer.firstChild);
+        renderGameBoard();
+    }
+
+    const toggleNav = () => {
+        if (nav.style.display === "") {
+            nav.style.display = "block";
+        } else {
+            nav.style.display = "";
+        }
+    }
+    
+    const windowResizeHandler = () => {
+        if (screen.width > 500) {
+            nav.style.display = "";
+        }
+    }
+
     return {
         renderGameBoard,
         ChangeSymbol,
+        toggleNav,
+        windowResizeHandler,
+        restartGame,
+        restartGameBtn,
+        toggleNavBtn
     }
 })();
 
 gameControl.renderGameBoard();
 gameControl.ChangeSymbol();
+
+window.addEventListener('resize', gameControl.windowResizeHandler);
+gameControl.toggleNavBtn.addEventListener('click', gameControl.toggleNav);
+gameControl.restartGameBtn.addEventListener('click', gameControl.restartGame);
