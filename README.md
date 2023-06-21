@@ -32,3 +32,6 @@ A function will needed to allow players to placed symbols on certain cells.
 
 A function will be needed to check a game over (3-in-row and tie);
 
+
+# ToDo
+Fix restart button. Add option for user to input name and symbol. Revise logic and flow.
