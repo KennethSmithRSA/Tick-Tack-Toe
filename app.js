@@ -1,3 +1,4 @@
+// Module pattern to create gameBoard array as a property of the gameBoard object 
 const GameBoard = (() => {
     const gameBoardObj = {
         gameBoardArr: [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -7,49 +8,56 @@ const GameBoard = (() => {
     }
 })();
 
+// Factory function to create player objects
 const Player = (name, symbol) => {
     return {name, symbol}
 }
 
-let player1 = Player('player1', 'X');
-let player2 = Player('player2', 'O');
+// Initialise players and player flag
+let player1 = Player('Player1', 'X');
+let player2 = Player('Player2', 'O');
 
-let playerFlag = player2;
+let playerFlag = player1;
 
+// Module pattern to contain game functions and reduce global scope pollution
 const gameControl = (() => {
-    const boardContainer = document.querySelector('.boardContainer');
     let toggleNavBtn = document.getElementById('toggle-nav');
     let nav = document.getElementById('navlist');
-    let restartGameBtn = document.getElementById('restartGameBtn');
+    const boardContainer = document.querySelector('.boardContainer');
     let roundWin = false;
     let count = 0;
+    // Array of arrays to test the gameBoard array against to test game end conditions
     const winningConditions = [
         [0, 1, 2],
         [3, 4, 5],
         [6, 7, 8],
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
         [0, 4, 8],
         [2, 4, 6]
     ]
 
+    // Function that changes the display that shows players whose turn it is.
+    const changePlayerTurnDisplay = () => {
+        let playerTurnDisplay = document.getElementById('playerTurn');
+        playerTurnDisplay.innerText = `Turn: ${playerFlag.name} Symbol: ${playerFlag.symbol}`
+    }
+
+    // Function to create the gameBoard. changeSymbol has to be here to avoid eventListener conflicts.
     const renderGameBoard = () => {
-        let length = GameBoard.gameBoardObj.gameBoardArr.length;
-
-        // for (let i = 0; i < length; i++) {
-        //     boardContainer.innerHTML += `<div class="cell" data-index="${i}">${GameBoard.gameBoardObj.gameBoardArr[i]}</>`
-        // }
-
-        for (let i = 0; i < length; i++) {
+        for (let i = 0; i < 9; i++) {
             let cell = document.createElement('div');
             cell.classList.add(`cell`);
             cell.setAttribute('data-index', `${i}`);
             cell.textContent = GameBoard.gameBoardObj.gameBoardArr[i];
             boardContainer.append(cell);
+            changePlayerTurnDisplay();
+            ChangeSymbol();
         }
     };
 
+    // Function that changes the symbol of the selected cell and checks game win conditions at each turn.
     const ChangeSymbol = () => {
         let cells = document.querySelectorAll('.cell');
         cells.forEach((cell) => {
@@ -57,21 +65,36 @@ const gameControl = (() => {
                 if (cell.textContent === 'X' || cell.textContent === 'O') {
                     cell.textContent = cell.textContent;
                 } else {
-                    if (playerFlag === player2) {
-                        playerFlag = player1;
-                    } else {
-                        playerFlag = player2;
-                    }
                     cell.textContent = playerFlag.symbol;
+                    playerFlag = changePlayerFlag(playerFlag);
                 }
                 GameBoard.gameBoardObj.gameBoardArr.splice(cell.dataset.index, 1, cell.textContent);
                 count++;
-                console.log(GameBoard.gameBoardObj.gameBoardArr);
+                changePlayerTurnDisplay();
                 checkGameEndConditions(GameBoard.gameBoardObj.gameBoardArr)
             })
         });
     };
 
+    // Function that changes the playerFlag value
+    const changePlayerFlag = (playerFlag) => {
+        return ((playerFlag === player1) ? player2 : player1)
+    }
+
+    // Function that reRenders gameBoard and zeros variables to allow for a new game.
+    const restartGame = () => {
+        let restartGameBtn = document.getElementById('restartGameBtn');
+        restartGameBtn.addEventListener('click', () => {
+            playerFlag = player1;
+            while (boardContainer.firstChild) {
+                boardContainer.removeChild(boardContainer.firstChild);
+            }
+            GameBoard.gameBoardObj.gameBoardArr = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+            renderGameBoard();
+        })
+    }
+
+    // Function that test current gameBoard against end game conditions
     const checkGameEndConditions = (arr) => {
         for (let i = 0; i <= 7; i++) {
             const winCondition = winningConditions[i];
@@ -91,13 +114,7 @@ const gameControl = (() => {
         }
     }
 
-    const restartGame = () => {
-        GameBoard.gameBoardObj.gameBoardArr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-        while (boardContainer.hasChildNodes())
-        boardContainer.removeChild(boardContainer.firstChild);
-        renderGameBoard();
-    }
-
+    // Function that hides or shows the navbar onclick of the hamburger icon
     const toggleNav = () => {
         if (nav.style.display === "") {
             nav.style.display = "block";
@@ -106,6 +123,7 @@ const gameControl = (() => {
         }
     }
     
+    // function that automatically shows the navbar at screenwidth > 500
     const windowResizeHandler = () => {
         if (screen.width > 500) {
             nav.style.display = "";
@@ -115,17 +133,16 @@ const gameControl = (() => {
     return {
         renderGameBoard,
         ChangeSymbol,
+        restartGame,
         toggleNav,
         windowResizeHandler,
-        restartGame,
-        restartGameBtn,
         toggleNavBtn
     }
 })();
 
+// Calls to all functions that are needed to make game run
 gameControl.renderGameBoard();
 gameControl.ChangeSymbol();
-
+gameControl.restartGame();
 window.addEventListener('resize', gameControl.windowResizeHandler);
 gameControl.toggleNavBtn.addEventListener('click', gameControl.toggleNav);
-gameControl.restartGameBtn.addEventListener('click', gameControl.restartGame);
