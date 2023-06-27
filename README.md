@@ -34,4 +34,4 @@ A function will be needed to check a game over (3-in-row and tie);
 
 
 # ToDo
-Add option for user to input name and symbol. Revise logic and flow.
+Revise logic and flow.
